@@ -3,7 +3,7 @@
 
 import pygame
 from pygame.locals import *
-import ctypes
+import frame_pb2, ctypes
 import sys, math, numpy, pylab, time
 
 import matplotlib as mpl
@@ -706,8 +706,8 @@ def GetQuadState():
 	U4 = (z5 - a5*theta_dot*phi_dot - alpha5*(z6+alpha5*z5) - alpha6*z6)/b3
 	#print U1,U2,U3,U4
 
-	b = 1
-	d = 1
+	b = 557.73*10**(-8) #1	#6.11*10^-8 (N/rpm^2) multiply by 3600/4pi^2 = 557.73*10^-8
+	d = 136.9*10**(-9) #1	#1.5*10^-9 (N*m/rpm^2) multiply by 3600/4pi^2 = 136.9 * 10^-9
 
 	omega1_2 = 0.5*(0.5*(U1/b - U4/d)-U3/b)
 	omega3_2 = 0.5*(0.5*(U1/b - U4/d)+U3/b)
@@ -739,7 +739,7 @@ def GetQuadState():
 	omega2 = math.sqrt(omega2_2)
 	omega4 = math.sqrt(omega4_2)
 
-#	print omega1,omega2,omega3,omega4
+	print omega1*(30/math.pi),omega2*(30/math.pi),omega3*(30/math.pi),omega4*(30/math.pi)
 
 	U1 = b*(omega1**2 + omega2**2 + omega3**2 + omega4**2)
 	U2 = b*(omega4**2 - omega2**2)
