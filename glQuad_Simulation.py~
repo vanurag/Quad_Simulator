@@ -122,7 +122,7 @@ def glInit():
 textures = []
 def LoadTextures():
     global textures
-    image = Image.open("wall2_cr.jpg")
+    image = Image.open("wall2.jpg")
     image2 = Image.open("floor2.jpg")
 	
     ix = image.size[0]

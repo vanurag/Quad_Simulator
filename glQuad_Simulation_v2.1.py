@@ -239,7 +239,7 @@ def Load_Quad_ViewMatrix():
 textures = []
 def LoadTextures():
     global textures
-    image = Image.open("wall2.jpg")	# wall
+    image = Image.open("wall2_cr.jpg")	# wall
     image2 = Image.open("wall3.jpg")	# floor
     image3 = Image.open("ceiling3.jpg")	# ceiling
 	

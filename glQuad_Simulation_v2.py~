@@ -20,7 +20,7 @@ except:
 
 mode = 'Ground View'	# Other option: "Bird's-Eye View"
 #mode = "Bird's-Eye View"
-resolution = 1500, 750
+resolution = 1000, 500
 
 timer = pygame.time.Clock()
 
