@@ -660,6 +660,8 @@ def GetQuadState():
 	b2 = 1/Iyy
 	b3 = 1/Izz
 
+	#psi = 0.0
+	#psi_dot = 0.0
 
 	z7 = z_ref - z
 	z9 = x_ref - x
@@ -724,14 +726,14 @@ def GetQuadState():
 	if omega4_2 < 0.0:
 		omega4_2 = 0.0
 
-#	if omega1_2 > 1.9**2:		# Setting Max thrust
-#		omega1_2 = 1.9**2
-#	if omega2_2 > 1.9**2:
-#		omega2_2 = 1.9**2
-#	if omega3_2 > 1.9**2:
-#		omega3_2 = 1.9**2
-#	if omega4_2 > 1.9**2:
-#		omega4_2 = 1.9**2
+	if omega1_2 > 8000**2:		# Setting Max thrust
+		omega1_2 = 8000**2
+	if omega2_2 > 8000**2:
+		omega2_2 = 8000**2
+	if omega3_2 > 8000**2:
+		omega3_2 = 8000**2
+	if omega4_2 > 8000**2:
+		omega4_2 = 8000**2
 	
 	omega1 = math.sqrt(omega1_2)
 	omega3 = math.sqrt(omega3_2)
@@ -781,6 +783,9 @@ def GetQuadState():
 	theta_x = theta
 	theta_y = psi
 	theta_z = phi
+
+	#psi = float(numpy.random.normal(2,2,1))
+	#psi_dot = float(numpy.random.normal(5,2,1))
 
 #	print phi, theta, psi
 

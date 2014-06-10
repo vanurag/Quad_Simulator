@@ -3,7 +3,6 @@
 
 import pygame
 from pygame.locals import *
-import frame_pb2, ctypes
 import sys, math, numpy, pylab, time
 
 import matplotlib as mpl

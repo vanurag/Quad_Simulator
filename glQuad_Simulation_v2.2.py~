@@ -3,6 +3,7 @@
 
 import pygame
 from pygame.locals import *
+#import frame_pb2, ctypes
 import sys, math, numpy, pylab, time
 
 import matplotlib as mpl
@@ -38,6 +39,14 @@ psi, psi_ref, psi_dot = 0.0, 0.0, 0.0
 x, x_ref, x_ref_prev, x_dot, x_ref_dot = 0., 0., 0.0, 0.0, 0.
 y, y_ref, y_ref_prev, y_dot, y_ref_dot = 0., 0.0, 0.0, 0.0, 0.
 z, z_ref, z_ref_prev, z_dot, z_ref_dot = 0.0, 0.0, 0.0, 0.0, 0.
+
+p, p_ref, p_dot = 0.0, 0.0, 0.0                #new variables
+q, q_ref, q_dot = 0.0, 0.0, 0.0
+r, r_ref, r_dot = 0.0, 0.0, 0.0
+u, u_ref, u_dot = 0.0, 0.0, 0.0
+v, v_ref, v_dot = 0.0, 0.0, 0.0
+w, w_ref, w_dot = 0.0, 0.0, 0.0
+
 sum_z,sum_z_ref = 0.0, 0.0
 sum_phi,sum_phi_ref = 0.0, 0.0
 sum_theta,sum_theta_ref = 0.0, 0.0
@@ -626,6 +635,7 @@ def GetQuadState():
 	global theta_x,theta_y,theta_z,x_shift,y_shift,z_shift
 	global mode
 	global plot_t, plot_x, plot_x_ref, plot_y, plot_y_ref, plot_z, plot_z_ref, plot_phi, plot_phi_ref, plot_theta, plot_theta_ref, plot_psi, plot_psi_ref
+	global u, v, w, p, q, r, u_dot, v_dot, w_dot, p_dot, q_dot, r_dot
 
 	t += dt
 	plot_t.append(t)
@@ -649,9 +659,9 @@ def GetQuadState():
 
 	###### Controller #######
 	#print x,y,z
-	alpha1,alpha2,alpha3,alpha4,alpha5,alpha6,alpha7,alpha8 = 15,15,15,15,15,15,15,15
-	alpha11 = alpha12 = 0.8#45e-3
-	alpha9 = alpha10 = 0.8#40e-3
+	alpha1,alpha2,alpha3,alpha4,alpha5,alpha6,alpha7,alpha8 = 6,6,6,6,6,6,6,6
+	alpha11 = alpha12 = 0.6#45e-3
+	alpha9 = alpha10 = 0.6#40e-3
 
 	a1 = (Iyy-Izz)/Ixx
 	a3 = (Izz-Ixx)/Iyy
@@ -660,8 +670,6 @@ def GetQuadState():
 	b2 = 1/Iyy
 	b3 = 1/Izz
 
-	#psi = 0.0
-	#psi_dot = 0.0
 
 	z7 = z_ref - z
 	z9 = x_ref - x
@@ -705,11 +713,10 @@ def GetQuadState():
 	U2 = (z1 - a1*theta_dot*psi_dot - alpha1*(z2+alpha1*z1) - alpha2*z2)/b1
 	U3 = (z3 - a3*phi_dot*psi_dot - alpha3*(z4+alpha3*z3) - alpha4*z4)/b2
 	U4 = (z5 - a5*theta_dot*phi_dot - alpha5*(z6+alpha5*z5) - alpha6*z6)/b3
-	U4 = 0
 	#print U1,U2,U3,U4
 
 	b = 557.73*10**(-8) #1	#6.11*10^-8 (N/rpm^2) multiply by 3600/4pi^2 = 557.73*10^-8
-	d = 0.1#136.9*10**(-9) #1	#1.5*10^-9 (N*m/rpm^2) multiply by 3600/4pi^2 = 136.9 * 10^-9
+	d = 136.9*10**(-9) #1	#1.5*10^-9 (N*m/rpm^2) multiply by 3600/4pi^2 = 136.9 * 10^-9
 
 	omega1_2 = 0.5*(0.5*(U1/b - U4/d)-U3/b)
 	omega3_2 = 0.5*(0.5*(U1/b - U4/d)+U3/b)
@@ -727,14 +734,14 @@ def GetQuadState():
 	if omega4_2 < 0.0:
 		omega4_2 = 0.0
 
-	if omega1_2 > 8000**2:		# Setting Max thrust
-		omega1_2 = 8000**2
-	if omega2_2 > 8000**2:
-		omega2_2 = 8000**2
-	if omega3_2 > 8000**2:
-		omega3_2 = 8000**2
-	if omega4_2 > 8000**2:
-		omega4_2 = 8000**2
+	if omega1_2 > (8000.)**2:		# Setting Max thrust
+		omega1_2 = (8000.)**2
+	if omega2_2 > (8000.)**2:
+		omega2_2 = (8000.)**2
+	if omega3_2 > (8000.)**2:
+		omega3_2 = (8000.)**2
+	if omega4_2 > (8000.)**2:
+		omega4_2 = (8000.)**2
 	
 	omega1 = math.sqrt(omega1_2)
 	omega3 = math.sqrt(omega3_2)
@@ -750,25 +757,59 @@ def GetQuadState():
 	#########################
 
 	###### Quadrotor Dynamics ######
-	y_dot_dot = uy*U1/m
-	x_dot_dot = ux*U1/m
-	z_dot_dot = math.cos(theta)*math.cos(phi)*U1/m - g
-	phi_dot_dot = (Iyy-Izz)*theta_dot*psi_dot/Ixx + U2/Ixx
-	theta_dot_dot = (Izz-Ixx)*phi_dot*psi_dot/Iyy + U3/Iyy
-	psi_dot_dot = (Ixx-Iyy)*theta_dot*phi_dot/Izz + U4/Izz
+	#y_dot_dot = uy*U1/m
+	#x_dot_dot = ux*U1/m
+	#z_dot_dot = math.cos(theta)*math.cos(phi)*U1/m - g
+	#phi_dot_dot = (Iyy-Izz)*theta_dot*psi_dot/Ixx + U2/Ixx
+	#theta_dot_dot = (Izz-Ixx)*phi_dot*psi_dot/Iyy + U3/Iyy
+	#psi_dot_dot = (Ixx-Iyy)*theta_dot*phi_dot/Izz + U4/Izz
 
-	x_dot = x_dot + dt*x_dot_dot
+	y_dot =-1* (u*math.cos(theta)*math.cos(psi) + v*math.sin(phi)*math.sin(theta)*math.cos(psi) - v*math.cos(phi)*math.sin(psi) + w*math.cos(phi)*math.sin(theta)*math.cos(psi) + w*math.sin(phi)*math.sin(psi))
+	x_dot =-1*( u*math.cos(theta)*math.sin(psi) + v*math.sin(phi)*math.sin(theta)*math.sin(psi) + v*math.cos(phi)*math.cos(psi) + w*math.cos(phi)*math.sin(theta)*math.sin(psi) - w*math.sin(phi)*math.cos(psi))
+	z_dot = u*math.sin(theta) -v*math.sin(phi)*math.cos(theta) - w*math.cos(phi)*math.cos(theta)
+	
+	u_dot = r*v - q*w - g*math.sin(theta)
+	v_dot = p*w - r*u + g*math.cos(theta)*math.sin(phi)
+	w_dot = q*u - p*v + g*math.cos(theta)*math.cos(phi) - U1/m
+	
+	phi_dot = p + q*math.sin(phi)*math.tan(theta) + r*math.cos(phi)*math.tan(theta)
+	theta_dot = q*math.cos(phi) - r*math.sin(phi)
+	psi_dot = q*math.sin(phi)/math.cos(theta) + r*math.cos(phi)/math.cos(theta)
+	
+	p_dot = (Iyy - Izz)*q*r/Ixx + U2/Ixx
+	q_dot = (Izz - Ixx)*p*r/Iyy + U3/Iyy
+	r_dot = (Ixx - Iyy)*q*p/Izz + U4/Izz
+	
 	x = x + dt*x_dot
-	y_dot = y_dot + dt*y_dot_dot
 	y = y + dt*y_dot
-	z_dot = z_dot + dt*z_dot_dot
 	z = z + dt*z_dot
-	phi_dot = phi_dot + dt*phi_dot_dot
-	phi = phi + dt*phi_dot
-	theta_dot = theta_dot + dt*theta_dot_dot
+	#print x, y, z
+	
+	u = u + dt*u_dot
+	v = v + dt*v_dot
+	w = w + dt*w_dot
+	
+	p = p + dt*p_dot
+	q = q + dt*q_dot
+	r = r + dt*r_dot
+	
 	theta = theta + dt*theta_dot
-	psi_dot = psi_dot + dt*psi_dot_dot
+	phi = phi + dt*phi_dot
 	psi = psi + dt*psi_dot
+	#print psi,theta,phi
+
+	#x_dot = x_dot + dt*x_dot_dot
+	#x = x + dt*x_dot
+	#y_dot = y_dot + dt*y_dot_dot
+	#y = y + dt*y_dot
+	#z_dot = z_dot + dt*z_dot_dot
+	#z = z + dt*z_dot
+	#phi_dot = phi_dot + dt*phi_dot_dot
+	#phi = phi + dt*phi_dot
+	#theta_dot = theta_dot + dt*theta_dot_dot
+	#theta = theta + dt*theta_dot
+	#psi_dot = psi_dot + dt*psi_dot_dot
+	#psi = psi + dt*psi_dot
 
 	sum_z += z
 	sum_z_ref += z_ref
@@ -784,9 +825,6 @@ def GetQuadState():
 	theta_x = theta
 	theta_y = psi
 	theta_z = phi
-
-	psi = float(numpy.random.normal(2,2,1))
-	psi_dot = float(numpy.random.normal(5,2,1))
 
 #	print phi, theta, psi
 
